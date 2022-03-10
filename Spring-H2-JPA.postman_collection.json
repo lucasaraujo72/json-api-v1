@@ -7,6 +7,55 @@
 	},
 	"item": [
 		{
+			"name": "Create new Tutorial",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"const response =  pm.response.json();\r",
+							"const tutorial = response.id;\r",
+							"console.log(tutorial);\r",
+							"const tutorial2 = response.title;\r",
+							"console.log(tutorial2);\r",
+							"\r",
+							"pm.globals.set(\"tutorialid\", tutorial);\r",
+							"pm.globals.set(\"tutorialtitle\", tutorial2);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"{{$randomWord}}\",\r\n    \"description\": \"{{$randomWords}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{APIlink}}/api/tutorials",
+					"host": [
+						"{{APIlink}}"
+					],
+					"path": [
+						"api",
+						"tutorials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Retrieve all Tutorials",
 			"event": [
 				{
@@ -38,31 +87,25 @@
 			"response": []
 		},
 		{
-			"name": "Find all published Tutorials",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{APIlink}}/api/tutorials/published",
-					"host": [
-						"{{APIlink}}"
-					],
-					"path": [
-						"api",
-						"tutorials",
-						"published"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Find all Tutorials which title contains keyword",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{APIlink}}/api/tutorials?title=Global",
+					"raw": "{{APIlink}}/api/tutorials?title={{tutorialtitle}}",
 					"host": [
 						"{{APIlink}}"
 					],
@@ -73,35 +116,8 @@
 					"query": [
 						{
 							"key": "title",
-							"value": "Global"
+							"value": "{{tutorialtitle}}"
 						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create new Tutorial",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"title\": \"{{$randomWord}}\",\r\n    \"description\": \"{{$randomWords}}\"\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{APIlink}}/api/tutorials",
-					"host": [
-						"{{APIlink}}"
-					],
-					"path": [
-						"api",
-						"tutorials"
 					]
 				}
 			},
@@ -109,6 +125,19 @@
 		},
 		{
 			"name": "Update a Tutorial by :id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "PUT",
 				"header": [],
@@ -134,7 +163,7 @@
 					"variable": [
 						{
 							"key": "id",
-							"value": "53"
+							"value": "{{tutorialid}}"
 						}
 					]
 				}
@@ -142,7 +171,54 @@
 			"response": []
 		},
 		{
+			"name": "Find all published Tutorials",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{APIlink}}/api/tutorials/published",
+					"host": [
+						"{{APIlink}}"
+					],
+					"path": [
+						"api",
+						"tutorials",
+						"published"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Delete a Tutorial by :id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"postman.setNextRequest(null);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "DELETE",
 				"header": [],
@@ -159,7 +235,7 @@
 					"variable": [
 						{
 							"key": "id",
-							"value": "3"
+							"value": "{{tutorialid}}"
 						}
 					]
 				}
