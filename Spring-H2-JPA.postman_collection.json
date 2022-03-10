@@ -1,13 +1,52 @@
 {
 	"info": {
-		"_postman_id": "207f0bd4-e100-45e5-8123-0fbe148e598c",
-		"name": "Spring-H2-JPA",
-		"description": "Methods Urls Actions\n\nPOST/api/tutorials create newTutorial\n\nGET/api/tutorials retrieve all Tutorials\n\nGET/api/tutorials/:id retrieve a Tutorial by `:id`\n\nPUT/api/tutorials/:id update a Tutorial by `:id`\n\nDELETE/api/tutorials/:id delete a Tutorial by `:id`\n\nDELETE/api/tutorials delete all Tutorials\n\nGET/api/tutorials/published find all published Tutorials\n\nGET/api/tutorials?title=\\[keyword\\] find all Tutorials which title contains `keyword`",
+		"_postman_id": "7f695630-466d-4221-ac33-78bb71e16361",
+		"name": "Simple Book API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Create new Tutorial",
+			"name": "API Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response =  pm.response.json();\r",
+							"console.log(response.status);\r",
+							"\r",
+							"pm.test(\"Status should be OK\", () => {\r",
+							"    pm.expect(response.status).to.eql(\"OK\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"//postman.setNextRequest(\"List of Books\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/status",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register API Client",
 			"event": [
 				{
 					"listen": "test",
@@ -18,13 +57,9 @@
 							"});\r",
 							"\r",
 							"const response =  pm.response.json();\r",
-							"const tutorial = response.id;\r",
-							"console.log(tutorial);\r",
-							"const tutorial2 = response.title;\r",
-							"console.log(tutorial2);\r",
+							"console.log(response.status);\r",
 							"\r",
-							"pm.globals.set(\"tutorialid\", tutorial);\r",
-							"pm.globals.set(\"tutorialtitle\", tutorial2);"
+							"pm.globals.set(\"accessTokenNew\", response.accessToken);"
 						],
 						"type": "text/javascript"
 					}
@@ -35,7 +70,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"title\": \"{{$randomWord}}\",\r\n    \"description\": \"{{$randomWords}}\"\r\n}\r\n",
+					"raw": "{\r\n   \"clientName\": \"{{$randomUserName}}\",\r\n   \"clientEmail\": \"{{$randomExampleEmail}}\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -43,20 +78,19 @@
 					}
 				},
 				"url": {
-					"raw": "{{APIlink}}/api/tutorials",
+					"raw": "{{baseUrl}}/api-clients",
 					"host": [
-						"{{APIlink}}"
+						"{{baseUrl}}"
 					],
 					"path": [
-						"api",
-						"tutorials"
+						"api-clients"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Retrieve all Tutorials",
+			"name": "List of Books",
 			"event": [
 				{
 					"listen": "test",
@@ -64,7 +98,37 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
-							"});"
+							"});\r",
+							"\r",
+							"const response =  pm.response.json();\r",
+							"const nonFictionBooks = response.filter((book) => book.available === true);\r",
+							"const book = nonFictionBooks[0];\r",
+							"\r",
+							"if(book){\r",
+							"    pm.globals.set(\"bookId\", book.id);\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Book found\", () => {\r",
+							"    pm.expect(book).to.be.an('object');\r",
+							"    //pm.expect(book.available).to.be.true;\r",
+							"    pm.expect(book.available).to.eql(true);\r",
+							"    //pm.expect(book.type).to.eql(\"non-fiction\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Book name\", () => {\r",
+							"    pm.expect(book.name).to.eql(\"The Russian\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Book type\", () => {\r",
+							"    pm.expect(book.type).to.eql(\"fiction\");\r",
+							"});\r",
+							"\r",
+							"console.log(nonFictionBooks[0]);\r",
+							"\r",
+							"//pm.globals.set(\"bookId\", nonFictionBooks[0].id)\r",
+							"\r",
+							"\r",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -74,96 +138,23 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{APIlink}}/api/tutorials",
+					"raw": "{{baseUrl}}/books",
 					"host": [
-						"{{APIlink}}"
+						"{{baseUrl}}"
 					],
 					"path": [
-						"api",
-						"tutorials"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Find all Tutorials which title contains keyword",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{APIlink}}/api/tutorials?title={{tutorialtitle}}",
-					"host": [
-						"{{APIlink}}"
-					],
-					"path": [
-						"api",
-						"tutorials"
+						"books"
 					],
 					"query": [
 						{
-							"key": "title",
-							"value": "{{tutorialtitle}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update a Tutorial by :id",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"title\": \"{{$randomWord}}\",\r\n    \"description\": \"{{$randomWords}}\",\r\n    \"published\": true\r\n}\r\n",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{APIlink}}/api/tutorials/:id",
-					"host": [
-						"{{APIlink}}"
-					],
-					"path": [
-						"api",
-						"tutorials",
-						":id"
-					],
-					"variable": [
+							"key": "type",
+							"value": "non-fiction",
+							"disabled": true
+						},
 						{
-							"key": "id",
-							"value": "{{tutorialid}}"
+							"key": "limit",
+							"value": "3",
+							"disabled": true
 						}
 					]
 				}
@@ -171,7 +162,7 @@
 			"response": []
 		},
 		{
-			"name": "Find all published Tutorials",
+			"name": "Get Single Book",
 			"event": [
 				{
 					"listen": "test",
@@ -179,7 +170,17 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
-							"});"
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Is in stock\", () => {\r",
+							"    pm.expect(response['current-stock']).to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"console.log(response);\r",
+							"\r",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -189,21 +190,173 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{APIlink}}/api/tutorials/published",
+					"raw": "{{baseUrl}}/books/:bookId",
 					"host": [
-						"{{APIlink}}"
+						"{{baseUrl}}"
 					],
 					"path": [
-						"api",
-						"tutorials",
-						"published"
+						"books",
+						":bookId"
+					],
+					"variable": [
+						{
+							"key": "bookId",
+							"value": "{{bookId}}"
+						}
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Delete a Tutorial by :id",
+			"name": "Submit an Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.globals.set(\"orderId\", response.orderId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessTokenNew}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"bookId\": 1,\r\n  \"customerName\": \"{{$randomFullName}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/orders",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of Orders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response =  pm.response.json();\r",
+							"const order0 = response[0].id;\r",
+							"\r",
+							"console.log(order0);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessTokenNew}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/orders",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get an order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessTokenNew}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/orders/:orderId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Patch an Order",
 			"event": [
 				{
 					"listen": "test",
@@ -213,29 +366,47 @@
 							"    pm.response.to.have.status(204);\r",
 							"});\r",
 							"\r",
-							"postman.setNextRequest(null);"
+							"//postman.setNextRequest(null);"
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
 			"request": {
-				"method": "DELETE",
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessTokenNew}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerName\": \"{{$randomFullName}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "{{APIlink}}/api/tutorials/:id",
+					"raw": "{{baseUrl}}/orders/:orderId",
 					"host": [
-						"{{APIlink}}"
+						"{{baseUrl}}"
 					],
 					"path": [
-						"api",
-						"tutorials",
-						":id"
+						"orders",
+						":orderId"
 					],
 					"variable": [
 						{
-							"key": "id",
-							"value": "{{tutorialid}}"
+							"key": "orderId",
+							"value": "{{orderId}}"
 						}
 					]
 				}
@@ -243,25 +414,74 @@
 			"response": []
 		},
 		{
-			"name": "Delete all Tutorials",
+			"name": "Delete an Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessTokenNew}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "DELETE",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "{{APIlink}}/api/tutorials/",
+					"raw": "{{baseUrl}}/orders/:orderId",
 					"host": [
-						"{{APIlink}}"
+						"{{baseUrl}}"
 					],
 					"path": [
-						"api",
-						"tutorials",
-						""
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
 					]
 				}
 			},
 			"response": []
 		}
 	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
 	"event": [
 		{
 			"listen": "prerequest",
@@ -284,8 +504,12 @@
 	],
 	"variable": [
 		{
-			"key": "APIlink",
-			"value": "http://localhost:8080",
+			"key": "baseUrl",
+			"value": "https://simple-books-api.glitch.me"
+		},
+		{
+			"key": "accessToken",
+			"value": "f65cb384920b7df33aa7e617f8354bd136c49197b91df740b1aebb0aeb64ac2b",
 			"type": "string"
 		}
 	]
